@@ -1,0 +1,8 @@
+node_modules
+bin
+.DS_Store
+
+!.gitignore
+
+build/mac/files
+build/window/files
