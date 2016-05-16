@@ -48,6 +48,12 @@ var DesignAction = {
 			actionType:'CHANGE_SORT_OPTION',
 			data:data
 		})
+	},
+	updateNowWorking:function(data){
+		AppDispatcher.handleAction({
+			actionType:'UPDATE_NOW_WORKING',
+			data:data
+		})
 	}
 }
 

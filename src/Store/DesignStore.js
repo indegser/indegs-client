@@ -9,6 +9,9 @@ var route = null;
 var _select = [];
 var sortOption = 'mDate';
 
+var nowWorking;
+
+
 var ctrlPressed = false;
 
 var _status = null;
@@ -41,6 +44,16 @@ var compare = function(a,b){
 		return 0;
 	}
 }
+
+var sortByAddedDate = function(a,b){
+	var date1 = new Date(a.aDate);
+	var date2 = new Date(b.aDate);
+	if(date1 < date2){return 1;}
+	if(date1 > date2){return -1;}
+	return 0;
+}
+
+
 
 var updateStatus = function(status){
 	_status = status;
@@ -154,6 +167,10 @@ var updateCtrlPress = function(bool){
 	ctrlPressed = bool;
 }
 
+var updateNowWorking = function(design){
+	nowWorking = design;
+}
+
 
 var DesignStore = objectAssign({},EventEmitter.prototype,{
 	addChangeListener:function(cb){
@@ -173,6 +190,10 @@ var DesignStore = objectAssign({},EventEmitter.prototype,{
 	},
 	getDesignLength:function(){
 		return _design.length;
+	},
+	getRecentlyAdded:function(index){
+		_design.sort(sortByAddedDate);
+		return _design.slice(0,index);
 	},
 	getRoute:function(){
 		return route;
@@ -195,6 +216,9 @@ var DesignStore = objectAssign({},EventEmitter.prototype,{
 				break;
 			}
 		}
+	},
+	getNowWorking:function(){
+		return nowWorking;
 	}
 });
 
@@ -230,6 +254,10 @@ AppDispatcher.register(function(payload){
 			break;
 		case 'CHANGE_SORT_OPTION':
 			changeSortOption(action.data);
+			DesignStore.emit('change');
+			break;
+		case 'UPDATE_NOW_WORKING':
+			updateNowWorking(action.data);
 			DesignStore.emit('change');
 			break;
 		default:

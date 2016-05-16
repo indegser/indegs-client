@@ -20,7 +20,7 @@ const VersionDate = React.createClass({
 	render:function(){
 		var dateString;
 		var date = this.props.date;
-		var dateString = Dates.getDateString(date);
+		var dateString = Dates.getVersionDate(date);
 
 		return (
 			<div className="date">{dateString}</div>
@@ -66,7 +66,7 @@ const VersionMessage = React.createClass({
 		}
 		return (
 			<div className="message">
-			<input type="text" style={{"width":width}} maxLength={50} className="version-message-input" onBlur={this.submitInput} onClick={this.changePlaceholder}onKeyPress={this.handleEnter} onChange={this.handleChange} value={message} placeholder="Write a message explaining this version.(optional)"></input>
+				<input type="text" style={{"width":width}} maxLength={50} onBlur={this.submitInput} onClick={this.changePlaceholder}onKeyPress={this.handleEnter} onChange={this.handleChange} value={message} placeholder="Write a message explaining this version.(optional)"></input>
 			</div>
 		)
 	}

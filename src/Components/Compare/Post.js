@@ -97,32 +97,82 @@ const PostView = React.createClass({
 
 const PostSubmit = React.createClass({
 	handleSubmit:function(e){
+		var self = this;
 		var session = UserStore.getSession();
+		if(session == null) {
+			self.props.message('Sign in first');
+			return null;
+		}
+
+		var _compare = CompareStore.getCompare();
+		var _post = CompareStore.getPost();
+
+		if(_compare == null){
+			self.props.message('Select versions to compare');
+			return null;
+		} else {
+			if(_compare.A == null || !_compare.A.status || _compare.B == null || !_compare.B.status){
+				self.props.message('Select versions to compare');
+				return null;
+			}
+		}
+
+		if(_post.title == null || _post.title.length == 0){
+			self.props.message('Fill in the title of this test');
+			return null;
+		}
+		var postObj = {
+			title:_post.title,
+			description:_post.text,
+			A:_compare.A,
+			B:_compare.B,
+		}
 		$(e.target).css('background','url("../images/loader.gif") 130% 50% / 90px no-repeat');
 		$(e.target).css('background-color','white');
 		$(e.target).css('border','none');
 		$(e.target).text('');
-		var _compare = CompareStore.getCompare();
-		var _post = CompareStore.getPost();
-		var postObj = {
-			title:_post.title,
-			text:_post.text,
-			A:_compare.A,
-			B:_compare.B,
-			session:session
-		}
 
-		CompareAPI.postCompare(postObj,function(cardObj){
-			CompareAction.togglePost(false);
-			shell.openExternal('http://localhost:3030/');
+		CompareAPI.post(postObj,session,function(cardObj){
+			self.props.success(cardObj);
+			// CompareAction.togglePost(false);
+			// shell.openExternal('http://localhost:3030/');
 		});
 	},
 	render:function(){
 		return (
-			<div id="post-submit" onClick={this.handleSubmit} >Post</div>
+			<div id="post-submit" onClick={this.handleSubmit}>Post</div>
 		)
 	}
-})
+});
+
+const Success = React.createClass({
+	getInitialState:function(){
+		return ({
+			successObj:this.props.successObj
+		})
+	},
+	handleChange:function(){
+		return null;
+	},
+	selectAll:function(e){
+		$(e.target).select()
+	},
+	render:function(){
+		var successObj = this.state.successObj;
+		var value = 'localhost:3030/cards/'+successObj._id
+		return (
+			<div id="post-success">
+				<div id="title">Succeessful!</div>
+				<div id="exp">
+					<span>Copy below link and paste it in any browsers.</span>
+				</div>
+				<input onFocus={this.selectAll} type="text" value={value} onChange={this.handleChange}></input>
+			</div>
+		)
+	}
+});
+
+
 
 const Post = React.createClass({
 	getInitialState:function(){
@@ -159,19 +209,39 @@ const Post = React.createClass({
 			right:'0px'
 		})
 	},
+	handleSubmitMessage:function(message){
+		this.setState({
+			message:message
+		})
+	},
+	handleSubmitSuccess:function(cardObj){
+		this.setState({
+			successObj:cardObj
+		})
+	},
 	render:function (){
 		var _compare = this.state._compare;
+		var message = this.state.message;
+		var successObj = this.state.successObj;
 		var right = this.state.right;
 		var postStyle = {
 			right:right
 		}
+
+		if(successObj != null) {
+			var body = <Success successObj={successObj} />;
+		} else {
+			var body = 	<div id="post-form">
+							<div id="title">Data-powered design.</div>
+							<PostTitle />
+							<PostText />
+							<div id="post-error">{message}</div>
+							<PostSubmit message={this.handleSubmitMessage} success={this.handleSubmitSuccess}/>
+						</div>;
+		}
 		return (
 			<div id="post" style={postStyle} >
-				<div id="title">Share your perfection</div>
-				<PostTitle />
-				<PostText />
-				<PostView _compare={_compare} />
-				<PostSubmit />
+				{body}
 			</div>
 		)
 	}

@@ -25,6 +25,8 @@ import DesignAction from '../Action/DesignAction';
 
 // Component
 import Action from './Designs/Action';
+import RecentlyAdded from './Designs/RecentlyAdded';
+import NowWorking from './Designs/NowWorking';
 
 
 
@@ -416,11 +418,13 @@ const Body = React.createClass({
 		$('#designs-drag-over').hide();
 
 		var self = this;
-		var files = e.dataTransfer.files;
-		this.checkExtension(files)
+		console.log(e.dataTransfer.getData(e.dataTransfer.types[0]));
+		// var files = e.dataTransfer.files;
+		// this.checkExtension(files)
 		e.target.value = null;
 	},
 	checkExtension:function(files){
+		console.log(files)
 		var self = this;
 		var success = [];
 		var error = "";
@@ -509,6 +513,8 @@ const Body = React.createClass({
 		return (
 			<div id="designs-body" onDragOver={this.onFileDragOver} onClick={this.handleSelect}>
 				<div id="designs-drag-over" onDrop={this.onFileDrop} onDragLeave={this.onFileDragLeave}></div>
+				<NowWorking />
+				<RecentlyAdded />
 				<div>
 					{designItem}
 				</div>

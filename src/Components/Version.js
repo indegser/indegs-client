@@ -5,6 +5,8 @@ var MenuItem = remote.require('menu-item');
 var clipboard = remote.require('clipboard');
 var Utils = require('../utils/Utils.js');
 
+import Dates from '../utils/Dates';
+
 var DesignAPI = require('../API/DesignAPI.js');
 var DesignAction = require('../Action/DesignAction.js');
 var VersionAPI = require('../API/VersionAPI.js');
@@ -25,21 +27,15 @@ import RouteAction from '../Action/RouteAction';
 const VersionMessage = React.createClass({
 	getInitialState:function(){
 		return({
-			message:this.props.version.message
-		})
-	},
-	componentWillReceiveProps:function(nextProps){
-		this.setState({
-			message:nextProps.version.message
+			message:this.props.version.message||''
 		})
 	},
 	submitInput:function(e){
 		var version = this.props.version;
-		var versionJson = Utils.getVersionJson(version.parentHash);
 		var message = this.state.message;
 		version.message = message;
-		Utils.rewriteWithKey(version,versionJson,'message');
-		$(e.target).attr('placeholder','Leave your work message')
+		VersionAPI.updateVersionMessage(version)
+		$(e.target).attr('placeholder','Write a message explaining this version.(optional)')
 	},
 	changePlaceholder:function(e){
 		$(e.target).attr('placeholder','Press [Enter] to save your message');
@@ -57,6 +53,7 @@ const VersionMessage = React.createClass({
 		$(e.target).css('background-color','white !important');
 	},
 	render:function(){
+		var message = this.state.message;
 		var width = this.props.width;
 		if(width <= 300){
 			width = '100%'
@@ -64,8 +61,8 @@ const VersionMessage = React.createClass({
 			width = width;
 		}
 		return (
-			<div className="version-message">
-			<input type="text" style={{"width":width}} maxLength={50} className="version-message-input" onBlur={this.submitInput} onClick={this.changePlaceholder}onKeyPress={this.handleEnter} onChange={this.handleChange} value={this.state.message} placeholder="Leave your work message"></input>
+			<div className="message">
+			<input type="text" style={{"width":width}} maxLength={50} onBlur={this.submitInput} onClick={this.changePlaceholder}onKeyPress={this.handleEnter} onChange={this.handleChange} value={message} placeholder="Write a message explaining this version.(optional)"></input>
 			</div>
 		)
 	}
@@ -350,8 +347,7 @@ const VersionItem = React.createClass({
 		var isSelected = this.state.isSelected;
 		if(itemStyle == null || imageStyle == null) return null;
 		var idx = this.props.idx;
-		var dateObj = Utils.getParsedDate(version.mDate);
-		var date = dateObj.month + ' ' + dateObj.day + ', ' + dateObj.hour + ':' + dateObj.minute + ' ' + dateObj.AP;
+		var date = Dates.getVersionDate(version.mDate);
 
 		var itemClass;
 		if(isSelected){
@@ -576,7 +572,7 @@ const Version = React.createClass({
 	},
 	handleBackspace:function(e){
 		var id = e.keyCode;
-		if($('.version-message-input').is(':focus') || $('#login-holder input').is(':focus')){
+		if($('.version-item .message input').is(':focus') || $('#login-holder input').is(':focus')){
 			return null;
 		} else {
 			if(id==8 || id==46){

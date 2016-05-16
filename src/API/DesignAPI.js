@@ -149,6 +149,10 @@ module.exports={
 	},
 	updateDesign:function(design){
 		var self = this;
+
+		// 일단 NowWorking에 넣어준다
+		DesignAction.updateNowWorking(design);
+
 		var stats = fs.statSync(design.path);
 		var path = Utils.getDesignPath(design.hash);
 
